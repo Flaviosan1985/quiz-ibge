@@ -1,71 +1,211 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IBGE Master Quiz AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              ibge: {
-                blue: '#005288',
-                yellow: '#F4A900',
-                green: '#009B3A'
-              }
-            },
-            animation: {
-              'bounce-short': 'bounce 0.5s ease-in-out 1',
-              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body {
-        background-color: #0f172a;
-        color: white;
-      }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1e293b; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #475569; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; 
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "canvas-confetti": "https://aistudiocdn.com/canvas-confetti@^1.9.4",
-    "vite": "https://aistudiocdn.com/vite@^7.2.4",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz IBGE Animado</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f9;
+    color: #333;
+    max-width: 800px; /* Limita a largura em telas grandes */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .question p {
+    font-size: 1.2em; /* Aumenta o tamanho da fonte da pergunta */
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  button {
+    margin: 5px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3498db;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  button:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+  }
+  button:active {
+    background-color: #1abc9c;
+    transform: scale(0.95);
+  }
+  .correct {
+    background-color: #2ecc71 !important; /* Verde */
+  }
+  .incorrect {
+    background-color: #e74c3c !important; /* Vermelho */
+  }
+  button.disabled {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  #progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  }
+  #progress-bar {
+    width: 0%; /* Inicia em 0 */
+    height: 22px;
+    background-color: #4caf50; /* Verde progresso */
+    border-radius: 8px;
+    text-align: center;
+    line-height: 22px;
+    color: white;
+    font-weight: bold;
+    transition: width 0.4s ease-in-out;
+  }
+
+  /* --- Estilos para Mobile --- */
+  @media (max-width: 600px) {
+    body {
+      margin: 10px; /* Margem menor em telas pequenas */
+      font-size: 16px;
+    }
+    .question button {
+      display: block; /* Faz os botões empilharem */
+      width: 100%;    /* Ocupam toda a largura */
+      margin: 8px 0;  /* Ajusta a margem vertical */
+      padding: 15px;  /* Aumenta a área de toque */
+    }
+  }
+</style>
+</head>
+<body>
+<h1>Simulado IBGE – Nível Médio</h1>
+<div id="progress-container">
+  <div id="progress-bar"></div>
+</div>
+<div id="quiz"></div>
+
+<script>
+let questions = [];
+let current = 0;
+let score = 0;
+
+// Cria um contexto de áudio para os sons de feedback
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function showQuestion(){
+  const q = questions[current];
+  const quizDiv = document.getElementById("quiz");
+  let html = `<div class="question"><p>${current+1}. ${q.q}</p>`;
+  q.options.forEach((opt,i)=>{
+    html += `<button data-choice="${i}">${String.fromCharCode(65+i)}) ${opt}</button>`;
+  });
+  html += `</div>`;
+  quizDiv.innerHTML = html;
+
+  updateProgressBar();
+
+  quizDiv.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', (event) => {
+      checkAnswer(parseInt(event.target.dataset.choice));
+    });
+  });
+}
+
+function checkAnswer(choice){
+  const q = questions[current];
+  const buttons = document.querySelectorAll('#quiz button');
+
+  buttons.forEach(button => button.classList.add('disabled'));
+
+  if(choice === questions[current].answer){
+    score++;
+    playFeedbackSound(true);
+  } else {
+    playFeedbackSound(false);
+  }
+
+  buttons[q.answer].classList.add('correct');
+  if (choice !== q.answer) {
+    buttons[choice].classList.add('incorrect');
+  }
+
+  setTimeout(() => {
+    current++;
+    if(current < questions.length){
+      showQuestion();
+    } else {
+      showResults();
+    }
+  }, 1500);
+}
+
+function playFeedbackSound(isCorrect) {
+  if (!audioCtx) return;
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  if (isCorrect) {
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.15);
+  } else {
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.3);
+  }
+  oscillator.start();
+}
+
+function updateProgressBar() {
+  const progress = ((current + 1) / questions.length) * 100;
+  const progressBar = document.getElementById('progress-bar');
+  if (progressBar) {
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = `${current + 1} / ${questions.length}`;
   }
 }
+
+function showResults() {
+  const quizDiv = document.getElementById("quiz");
+  quizDiv.innerHTML =
+    `<h2>Fim do simulado!</h2>
+     <p>Pontuação: ${score}/${questions.length}</p>
+     <p>Média final: ${(score/questions.length*10).toFixed(1)}</p>
+     <button onclick="restartQuiz()">Reiniciar Quiz</button>`;
+  document.getElementById('progress-container').style.display = 'none';
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  document.getElementById('progress-container').style.display = 'block';
+  startQuiz();
+}
+
+async function startQuiz() {
+  try {
+    document.getElementById('progress-container').style.display = 'block';
+    const response = await fetch('questions.json');
+    questions = await response.json();
+    showQuestion();
+  } catch (error) {
+    document.getElementById("quiz").innerHTML = "<p>Erro ao carregar as perguntas. Verifique o arquivo 'questions.json'.</p>";
+    console.error("Falha ao carregar o quiz:", error);
+  }
+}
+
+startQuiz();
 </script>
-<link rel="stylesheet" href="/index.css">
-</head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+</body>
 </html>
