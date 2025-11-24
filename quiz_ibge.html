@@ -91,12 +91,24 @@ function checkAnswer(choice){
     if(current < questions.length){
       showQuestion();
     } else {
-      document.getElementById("quiz").innerHTML =
-        `<h2>Fim do simulado!</h2>
-         <p>Pontuação: ${score}/${questions.length}</p>
-         <p>Média final: ${(score/questions.length*10).toFixed(1)}</p>`;
+      showResults();
     }
   }, 1500); // Espera 1.5 segundos antes de continuar
+}
+
+function showResults() {
+  const quizDiv = document.getElementById("quiz");
+  quizDiv.innerHTML =
+    `<h2>Fim do simulado!</h2>
+     <p>Pontuação: ${score}/${questions.length}</p>
+     <p>Média final: ${(score/questions.length*10).toFixed(1)}</p>
+     <button onclick="restartQuiz()">Reiniciar Quiz</button>`;
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  showQuestion();
 }
 
 showQuestion();
