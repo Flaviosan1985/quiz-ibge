@@ -96,6 +96,9 @@ let questions = [];
 let current = 0;
 let score = 0;
 
+// Cria um contexto de áudio para os sons de feedback
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
 function showQuestion(){
   const q = questions[current];
   const quizDiv = document.getElementById("quiz");
@@ -125,7 +128,12 @@ function checkAnswer(choice){
   // Desabilita todos os botões para evitar cliques múltiplos
   buttons.forEach(button => button.classList.add('disabled'));
 
-  if(choice === questions[current].answer){ score++; }
+  if(choice === questions[current].answer){
+    score++;
+    playFeedbackSound(true); // Toca som de acerto
+  } else {
+    playFeedbackSound(false); // Toca som de erro
+  }
 
   // Adiciona classes para feedback visual
   buttons[q.answer].classList.add('correct');
@@ -142,6 +150,32 @@ function checkAnswer(choice){
       showResults();
     }
   }, 1500); // Espera 1.5 segundos antes de continuar
+}
+
+function playFeedbackSound(isCorrect) {
+  // O AudioContext pode não ser suportado em navegadores muito antigos
+  if (!audioCtx) return;
+
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  if (isCorrect) {
+    // Som de acerto: tom agudo e curto
+    oscillator.type = 'sine'; // Onda suave
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); // Volume
+    oscillator.stop(audioCtx.currentTime + 0.15); // Duração
+  } else {
+    // Som de erro: tom grave e mais "duro"
+    oscillator.type = 'square'; // Onda mais "quadrada"
+    oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.3);
+  }
+  oscillator.start();
 }
 
 function updateProgressBar() {
@@ -169,7 +203,16 @@ function restartQuiz() {
   score = 0;
   // Mostra a barra de progresso novamente
   document.getElementById('progress-container').style.display = 'block';
+  // Embaralha as perguntas para um novo desafio
+  shuffleArray(questions);
   showQuestion();
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 }
 
 // Função principal que inicia o quiz
@@ -179,6 +222,8 @@ async function startQuiz() {
     document.getElementById('progress-container').style.display = 'block';
     const response = await fetch('questions.json'); // Carrega o arquivo JSON
     questions = await response.json(); // Converte a resposta em um objeto JavaScript
+    // Embaralha as perguntas ao carregar o quiz pela primeira vez
+    shuffleArray(questions);
     showQuestion(); // Mostra a primeira pergunta
   } catch (error) {
     document.getElementById("quiz").innerHTML = "<p>Erro ao carregar as perguntas. Tente novamente mais tarde.</p>";
