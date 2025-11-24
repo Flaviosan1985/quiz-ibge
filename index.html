@@ -42,12 +42,7 @@
 <div id="quiz"></div>
 
 <script>
-const questions = [
-  {q:"O IBGE é vinculado a qual ministério?", options:["Educação","Economia","Justiça","Saúde"], answer:1},
-  {q:"Qual pesquisa estima a população anualmente?", options:["Censo Demográfico","PNAD Contínua","Pesquisa Nacional de Saúde","Pesquisa Industrial Mensal"], answer:1},
-  {q:"A densidade demográfica é calculada por:", options:["População ÷ área territorial","População urbana ÷ rural","Natalidade ÷ mortalidade","Crescimento ÷ PIB"], answer:0}
-];
-
+let questions = [];
 let current = 0;
 let score = 0;
 
@@ -111,7 +106,19 @@ function restartQuiz() {
   showQuestion();
 }
 
-showQuestion();
+// Função principal que inicia o quiz
+async function startQuiz() {
+  try {
+    const response = await fetch('questions.json'); // Carrega o arquivo JSON
+    questions = await response.json(); // Converte a resposta em um objeto JavaScript
+    showQuestion(); // Mostra a primeira pergunta
+  } catch (error) {
+    document.getElementById("quiz").innerHTML = "<p>Erro ao carregar as perguntas. Tente novamente mais tarde.</p>";
+    console.error("Falha ao carregar o quiz:", error);
+  }
+}
+
+startQuiz(); // Inicia o processo
 </script>
 </body>
 </html>

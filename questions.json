@@ -1,0 +1,52 @@
+[
+  {
+    "q": "O IBGE é uma fundação pública vinculada a qual ministério?",
+    "options": ["Ministério da Educação", "Ministério da Economia", "Ministério da Justiça", "Ministério da Saúde"],
+    "answer": 1
+  },
+  {
+    "q": "Qual pesquisa do IBGE é a principal fonte de dados sobre a força de trabalho no Brasil, divulgada trimestralmente?",
+    "options": ["Censo Demográfico", "PNAD Contínua", "Pesquisa Nacional de Saúde", "Pesquisa Industrial Mensal"],
+    "answer": 1
+  },
+  {
+    "q": "A densidade demográfica, um importante indicador geográfico, é calculada pela razão entre:",
+    "options": ["População absoluta e área territorial", "População urbana e população rural", "Taxa de natalidade e taxa de mortalidade", "Crescimento populacional e PIB"],
+    "answer": 0
+  },
+  {
+    "q": "De acordo com o Código de Ética do IBGE, um dever primordial do servidor é:",
+    "options": ["Ser pontual e assíduo", "Manter sigilo sobre os dados", "Usar o crachá de identificação", "Tratar mal o informante"],
+    "answer": 1
+  },
+  {
+    "q": "O Censo Demográfico é realizado, em regra, a cada quantos anos?",
+    "options": ["2 anos", "5 anos", "10 anos", "12 anos"],
+    "answer": 2
+  },
+  {
+    "q": "Qual o nome do órgão máximo na estrutura organizacional do IBGE?",
+    "options": ["Presidência", "Conselho Diretor", "Diretoria Executiva", "Conselho Curador"],
+    "answer": 1
+  },
+  {
+    "q": "A coleta de dados do Censo Demográfico é realizada por qual servidor?",
+    "options": ["Analista", "Técnico", "Supervisor", "Recenseador"],
+    "answer": 3
+  },
+  {
+    "q": "O que significa a sigla PNAD?",
+    "options": ["Pesquisa Nacional de Amostra de Domicílios", "Programa Nacional de Apoio ao Desenvolvimento", "Plano Nacional de Dados", "Pesquisa Nominal de Domicílios"],
+    "answer": 0
+  },
+  {
+    "q": "Qual destes NÃO é um dos princípios fundamentais da estatística oficial, segundo a ONU e adotado pelo IBGE?",
+    "options": ["Relevância", "Imparcialidade", "Confidencialidade Estatística", "Lucratividade"],
+    "answer": 3
+  },
+  {
+    "q": "O dispositivo móvel de coleta utilizado pelos recenseadores do IBGE é conhecido pela sigla:",
+    "options": ["DMC", "PDA", "GPS", "TABLET"],
+    "answer": 0
+  }
+]
