@@ -2,10 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz IBGE Animado</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  .question { margin-bottom: 15px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f9;
+    color: #333;
+    max-width: 800px; /* Limita a largura em telas grandes */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .question p {
+    font-size: 1.2em; /* Aumenta o tamanho da fonte da pergunta */
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
   button {
     margin: 5px;
     padding: 10px 15px;
@@ -15,7 +28,8 @@
     color: white;
     font-size: 16px;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.3s;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
   button:hover {
     background-color: #2980b9;
@@ -35,10 +49,45 @@
     pointer-events: none;
     opacity: 0.7;
   }
+  #progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  }
+  #progress-bar {
+    width: 0%; /* Inicia em 0 */
+    height: 22px;
+    background-color: #4caf50; /* Verde progresso */
+    border-radius: 8px;
+    text-align: center;
+    line-height: 22px;
+    color: white;
+    font-weight: bold;
+    transition: width 0.4s ease-in-out;
+  }
+
+  /* --- Estilos para Mobile --- */
+  @media (max-width: 600px) {
+    body {
+      margin: 10px; /* Margem menor em telas pequenas */
+      font-size: 16px;
+    }
+    .question button {
+      display: block; /* Faz os botões empilharem */
+      width: 100%;    /* Ocupam toda a largura */
+      margin: 8px 0;  /* Ajusta a margem vertical */
+      padding: 15px;  /* Aumenta a área de toque */
+    }
+  }
 </style>
 </head>
 <body>
 <h1>Simulado IBGE – Nível Médio</h1>
+<div id="progress-container">
+  <div id="progress-bar"></div>
+</div>
 <div id="quiz"></div>
 
 <script>
@@ -56,6 +105,9 @@ function showQuestion(){
   });
   html += `</div>`;
   quizDiv.innerHTML = html;
+
+  // Atualiza a barra de progresso
+  updateProgressBar();
 
   // Adiciona os event listeners aos novos botões
   quizDiv.querySelectorAll('button').forEach(button => {
@@ -91,6 +143,15 @@ function checkAnswer(choice){
   }, 1500); // Espera 1.5 segundos antes de continuar
 }
 
+function updateProgressBar() {
+  const progress = ((current + 1) / questions.length) * 100;
+  const progressBar = document.getElementById('progress-bar');
+  if (progressBar) {
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = `${current + 1} / ${questions.length}`;
+  }
+}
+
 function showResults() {
   const quizDiv = document.getElementById("quiz");
   quizDiv.innerHTML =
@@ -98,17 +159,23 @@ function showResults() {
      <p>Pontuação: ${score}/${questions.length}</p>
      <p>Média final: ${(score/questions.length*10).toFixed(1)}</p>
      <button onclick="restartQuiz()">Reiniciar Quiz</button>`;
+  // Opcional: Esconde a barra de progresso na tela de resultados
+  document.getElementById('progress-container').style.display = 'none';
 }
 
 function restartQuiz() {
   current = 0;
   score = 0;
+  // Mostra a barra de progresso novamente
+  document.getElementById('progress-container').style.display = 'block';
   showQuestion();
 }
 
 // Função principal que inicia o quiz
 async function startQuiz() {
   try {
+    // Garante que a barra de progresso esteja visível ao iniciar
+    document.getElementById('progress-container').style.display = 'block';
     const response = await fetch('questions.json'); // Carrega o arquivo JSON
     questions = await response.json(); // Converte a resposta em um objeto JavaScript
     showQuestion(); // Mostra a primeira pergunta
